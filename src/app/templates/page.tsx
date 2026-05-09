@@ -5,9 +5,9 @@ import Link from 'next/link';
 export default async function TemplatesPage({
   searchParams,
 }: {
-  searchParams: { industry?: string; type?: string }
+  searchParams: Promise<{ industry?: string; type?: string }>
 }) {
-  const { industry, type } = searchParams;
+  const { industry, type } = await searchParams;
 
   // フィルタリング条件の構築
   const where: any = {};
@@ -27,9 +27,9 @@ export default async function TemplatesPage({
       </div>
 
       <div className="glass-card section">
-        <div className="filter-bar">
+        <form className="filter-bar" method="GET">
           <div className="form-group" style={{ marginBottom: 0, minWidth: '200px' }}>
-            <select className="form-select" defaultValue={industry || 'ALL'} onChange="/* Client component wrapper needed for actual filtering */">
+            <select className="form-select" name="industry" defaultValue={industry || 'ALL'}>
               <option value="ALL">すべての業界</option>
               {INDUSTRIES.map(i => (
                 <option key={i.value} value={i.value}>{i.label}</option>
@@ -38,14 +38,15 @@ export default async function TemplatesPage({
             </select>
           </div>
           <div className="form-group" style={{ marginBottom: 0, minWidth: '200px' }}>
-            <select className="form-select" defaultValue={type || 'ALL'} onChange="/* Client component wrapper needed */">
+            <select className="form-select" name="type" defaultValue={type || 'ALL'}>
               <option value="ALL">すべての種類</option>
               {ES_TEMPLATE_TYPES.map(t => (
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
             </select>
           </div>
-        </div>
+          <button type="submit" className="btn btn-primary btn-sm">絞り込み</button>
+        </form>
       </div>
 
       <div className="company-grid">
