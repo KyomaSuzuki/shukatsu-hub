@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getIndustryColor, getStatusInfo } from '@/lib/constants';
 
-export default async function CompanyDetailPage({ params }: { params: { id: string } }) {
+export default async function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const company = await prisma.company.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       selections: true,
       events: { orderBy: { date: 'asc' } },
