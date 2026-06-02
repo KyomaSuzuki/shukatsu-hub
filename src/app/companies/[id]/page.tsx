@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import SelectionPipeline from '@/components/companies/SelectionPipeline';
+import CompanyActions from '@/components/companies/CompanyActions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getIndustryColor, getStatusInfo } from '@/lib/constants';
@@ -42,10 +43,11 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
           </div>
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
             <span className="badge" style={{ background: `${statusInfo.color}20`, color: statusInfo.color, fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
               {statusInfo.icon} {statusInfo.label}
             </span>
+            <CompanyActions companyId={company.id} companyName={company.name} />
           </div>
         </div>
 

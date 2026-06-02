@@ -4,15 +4,31 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { INDUSTRIES, COMPANY_STATUSES } from '@/lib/constants';
 
-export default function CompanyForm() {
+interface CompanyFormProps {
+  defaultValues?: {
+    name: string;
+    industry: string;
+    category?: string | null;
+    website?: string | null;
+    status: string;
+    difficulty: number | null;
+    notes?: string | null;
+  };
+  companyId?: string; // 指定があれば編集モード (PUT)
+}
+
+export default function CompanyForm({ defaultValues, companyId }: CompanyFormProps) {
   const router = useRouter();
+  const isEditMode = !!companyId;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    industry: INDUSTRIES[0].value,
-    status: 'INTERESTED',
-    difficulty: '2',
-    notes: '',
+    name: defaultValues?.name ?? '',
+    industry: defaultValues?.industry ?? INDUSTRIES[0].value,
+    category: defaultValues?.category ?? '',
+    website: defaultValues?.website ?? '',
+    status: defaultValues?.status ?? 'INTERESTED',
+    difficulty: String(defaultValues?.difficulty ?? 2),
+    notes: defaultValues?.notes ?? '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -23,20 +39,34 @@ export default function CompanyForm() {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const res = await fetch('/api/companies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          difficulty: parseInt(formData.difficulty),
-        }),
-      });
+    const payload = {
+      ...formData,
+      difficulty: parseInt(formData.difficulty),
+      category: formData.category || null,
+      website: formData.website || null,
+      notes: formData.notes || null,
+    };
 
-      if (!res.ok) throw new Error('Failed to create company');
-      
-      const newCompany = await res.json();
-      router.push(`/companies/${newCompany.id}`);
+    try {
+      let res: Response;
+      if (isEditMode) {
+        res = await fetch(`/api/companies/${companyId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        res = await fetch('/api/companies', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (!res.ok) throw new Error('Failed to save company');
+
+      const saved = await res.json();
+      router.push(`/companies/${saved.id}`);
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -50,11 +80,11 @@ export default function CompanyForm() {
     <form onSubmit={handleSubmit} className="glass-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
       <div className="form-group">
         <label className="form-label">企業名 <span style={{ color: 'var(--color-danger)' }}>*</span></label>
-        <input 
-          type="text" 
-          name="name" 
-          className="form-input" 
-          required 
+        <input
+          type="text"
+          name="name"
+          className="form-input"
+          required
           value={formData.name}
           onChange={handleChange}
           placeholder="例: 株式会社バンダイ"
@@ -81,6 +111,32 @@ export default function CompanyForm() {
         </div>
       </div>
 
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">サブカテゴリ</label>
+          <input
+            type="text"
+            name="category"
+            className="form-input"
+            value={formData.category}
+            onChange={handleChange}
+            placeholder="例: ユーザー系SIer"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Webサイト</label>
+          <input
+            type="url"
+            name="website"
+            className="form-input"
+            value={formData.website}
+            onChange={handleChange}
+            placeholder="https://..."
+          />
+        </div>
+      </div>
+
       <div className="form-group">
         <label className="form-label">難易度 (1〜3)</label>
         <select name="difficulty" className="form-select" value={formData.difficulty} onChange={handleChange}>
@@ -92,9 +148,9 @@ export default function CompanyForm() {
 
       <div className="form-group">
         <label className="form-label">メモ・備考</label>
-        <textarea 
-          name="notes" 
-          className="form-textarea" 
+        <textarea
+          name="notes"
+          className="form-textarea"
           value={formData.notes}
           onChange={handleChange}
           placeholder="魅力に感じている点や注意点など"
@@ -106,7 +162,7 @@ export default function CompanyForm() {
           キャンセル
         </button>
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? '登録中...' : '企業を登録する'}
+          {loading ? '保存中...' : isEditMode ? '変更を保存' : '企業を登録する'}
         </button>
       </div>
     </form>
