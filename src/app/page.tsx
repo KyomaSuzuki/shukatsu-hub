@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import SyncGmailButton from '@/components/gmail/SyncGmailButton';
 
 // --- Dashboard Server Component ---
 export default async function DashboardPage() {
@@ -41,11 +42,14 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">ダッシュボード</h1>
-        <Link href="/companies/new" className="btn btn-primary">
-          + 企業を登録
-        </Link>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <SyncGmailButton />
+          <Link href="/companies/new" className="btn btn-primary">
+            + 企業を登録
+          </Link>
+        </div>
       </div>
 
       {/* --- 統計カード --- */}
