@@ -22,8 +22,11 @@ export default async function TemplatesPage({
 
   return (
     <div>
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">ESテンプレート</h1>
+        <Link href="/templates/new" className="btn btn-primary">
+          + テンプレートを登録
+        </Link>
       </div>
 
       <div className="glass-card section">
@@ -51,8 +54,15 @@ export default async function TemplatesPage({
 
       <div className="company-grid">
         {templates.map(template => (
-          <div key={template.id} className="template-card">
-            <div className="template-card-header">
+          <div key={template.id} className="template-card" style={{ position: 'relative' }}>
+            <Link 
+              href={`/templates/${template.id}/edit`}
+              style={{ position: 'absolute', top: '1rem', right: '1rem', fontSize: '1.2rem', textDecoration: 'none' }}
+              title="編集する"
+            >
+              ✏️
+            </Link>
+            <div className="template-card-header" style={{ paddingRight: '2rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{template.title}</h3>
               <span className="badge" style={{ background: 'var(--color-bg-secondary)' }}>
                 {template.wordCount}字
@@ -61,6 +71,9 @@ export default async function TemplatesPage({
             <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
               <span className="badge" style={{ background: 'rgba(6, 182, 212, 0.1)', color: 'var(--color-accent)' }}>
                 {template.industry}
+              </span>
+              <span className="badge" style={{ background: 'rgba(168, 85, 247, 0.1)', color: 'var(--color-purple)' }}>
+                {ES_TEMPLATE_TYPES.find(t => t.value === template.type)?.label || template.type}
               </span>
             </div>
             <div className="template-content">
