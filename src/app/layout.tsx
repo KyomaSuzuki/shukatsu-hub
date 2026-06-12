@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "ShuKATSU Hub",
@@ -16,13 +17,15 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        <div className="app-layout">
-          <Sidebar />
-          <Header />
-          <main className="main-content">
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <div className="app-layout">
+            <Sidebar />
+            <Header />
+            <main className="main-content">
+              {children}
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
