@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const template = await prisma.esTemplate.create({
