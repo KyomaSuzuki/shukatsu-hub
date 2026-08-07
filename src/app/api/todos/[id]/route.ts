@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { todoUpdateSchema } from '@/lib/schemas';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -9,12 +10,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
   try {
     const { id } = await params;
-    const body = await request.json();
-    
+    const raw = await request.json();
+    const parsed = todoUpdateSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: '入力値が不正です', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
     const updatedTodo = await prisma.todo.update({
       where: { id },
       data: {
-        completed: body.completed,
+        completed: parsed.data.completed,
       },
     });
 

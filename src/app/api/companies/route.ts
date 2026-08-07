@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { SELECTION_STAGES } from '@/lib/constants';
+import { companyCreateSchema } from '@/lib/schemas';
 
 export async function GET() {
   const session = await auth();
@@ -30,17 +31,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
   }
   try {
-    const body = await request.json();
-    
+    const raw = await request.json();
+    const parsed = companyCreateSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: '入力値が不正です', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const body = parsed.data;
+
     // 企業を作成
     const company = await prisma.company.create({
       data: {
         name: body.name,
         industry: body.industry,
-        category: body.category,
-        website: body.website,
-        difficulty: body.difficulty,
-        notes: body.notes,
+        category: body.category ?? null,
+        website: body.website || null,
+        difficulty: body.difficulty ?? null,
+        notes: body.notes ?? null,
         status: body.status,
       },
     });
